@@ -83,22 +83,31 @@
         button:hover {
             background-color: #2980b9;
         }
-
-        #copy-button {
-            display: none; /* Hide the copy button initially */
+        
+        .hidden-button {
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Ai to Word by Vinay</h1>
+        <h1>Markdown to Rich Text Converter</h1>
         <div class="main-window-container">
-            <textarea id="markdown-input" placeholder="Type your Markdown text here..."></textarea>
+            <textarea id="markdown-input" placeholder="Type your Markdown text here..."># Sample Heading
+
+This is a regular paragraph of text. It demonstrates how standard text will be handled by the converter.
+
+## Another Sub-heading
+
+This paragraph includes **bold text**. You can also use __double underscores__ for bolding in markdown, and this converter will handle both.
+
+This is a final sentence. It shows that the converter will also preserve regular lines of text.</textarea>
             <div id="output-div"></div>
         </div>
         <div class="button-container">
             <button id="toggle-view-button">Render HTML</button>
-            <button id="copy-button">Copy Rendered Text</button>
+            <button id="copy-button" class="hidden-button">Copy Rendered Text</button>
+            <button id="clear-button">Clear Markdown Code</button>
         </div>
     </div>
 
@@ -109,6 +118,7 @@
             const outputDiv = document.getElementById('output-div');
             const toggleButton = document.getElementById('toggle-view-button');
             const copyButton = document.getElementById('copy-button');
+            const clearButton = document.getElementById('clear-button');
             const converter = new showdown.Converter();
 
             function convertMarkdownToHtml() {
@@ -123,7 +133,8 @@
                     markdownInput.style.display = 'block';
                     outputDiv.style.display = 'none';
                     toggleButton.textContent = 'Render HTML';
-                    copyButton.style.display = 'none';
+                    copyButton.classList.add('hidden-button');
+                    clearButton.classList.remove('hidden-button');
                 } else {
                     // Currently showing Markdown, switch to Rich Text
                     // Perform conversion before showing the output
@@ -131,12 +142,12 @@
                     markdownInput.style.display = 'none';
                     outputDiv.style.display = 'block';
                     toggleButton.textContent = 'Edit Markdown';
-                    copyButton.style.display = 'inline-block';
+                    copyButton.classList.remove('hidden-button');
+                    clearButton.classList.add('hidden-button');
                 }
             }
 
             async function copyToClipboard() {
-                // Get both the rich HTML and plain text versions of the content
                 const htmlContent = outputDiv.innerHTML;
                 const plainTextContent = outputDiv.textContent;
 
@@ -158,15 +169,18 @@
                     alert('Could not copy text. Please try again or copy manually.');
                 }
             }
+            
+            function clearMarkdownCode() {
+                markdownInput.value = '';
+            }
 
             // Set the initial state by performing the conversion
             convertMarkdownToHtml();
 
-            // Toggle the view when the button is clicked
+            // Event listeners
             toggleButton.addEventListener('click', toggleView);
-
-            // Copy to clipboard when the button is clicked
             copyButton.addEventListener('click', copyToClipboard);
+            clearButton.addEventListener('click', clearMarkdownCode);
         });
     </script>
 </body>
