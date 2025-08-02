@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown to Rich Text Converter</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+
+        .main-window-container {
+            position: relative;
+            height: 400px;
+            margin-top: 20px;
+        }
+
+        #markdown-input, #output-div {
+            width: 100%;
+            height: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        #markdown-input {
+            font-family: monospace;
+            resize: vertical;
+        }
+
+        #output-div {
+            background-color: #ecf0f1;
+            overflow-y: auto;
+            display: none; /* Hide rich text view initially */
+        }
+        
+        /* Default styles for rich text output */
+        #output-div h1 { font-size: 2em; margin-bottom: 0.5em; }
+        #output-div h2 { font-size: 1.5em; margin-bottom: 0.5em; }
+        #output-div p { margin-bottom: 1em; line-height: 1.5; }
+        #output-div strong, #output-div b { font-weight: bold; }
+        
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        #copy-button {
+            display: none; /* Hide the copy button initially */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ai to Word by Vinay</h1>
+        <div class="main-window-container">
+            <textarea id="markdown-input" placeholder="Type your Markdown text here..."># Sample Heading
+
+This is a regular paragraph of text. It demonstrates how standard text will be handled by the converter.
+
+## Another Sub-heading
+
+This paragraph includes **bold text**. You can also use __double underscores__ for bolding in markdown, and this converter will handle both.
+
+This is a final sentence. It shows that the converter will also preserve regular lines of text.</textarea>
+            <div id="output-div"></div>
+        </div>
+        <div class="button-container">
+            <button id="toggle-view-button">Render HTML</button>
+            <button id="copy-button">Copy Rendered Text</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const markdownInput = document.getElementById('markdown-input');
+            const outputDiv = document.getElementById('output-div');
+            const toggleButton = document.getElementById('toggle-view-button');
+            const copyButton = document.getElementById('copy-button');
+            const converter = new showdown.Converter();
+
+            function convertMarkdownToHtml() {
+                const markdownText = markdownInput.value;
+                const html = converter.makeHtml(markdownText);
+                outputDiv.innerHTML = html;
+            }
+
+            function toggleView() {
+                if (markdownInput.style.display === 'none') {
+                    // Currently showing Rich Text, switch to Markdown
+                    markdownInput.style.display = 'block';
+                    outputDiv.style.display = 'none';
+                    toggleButton.textContent = 'Render HTML';
+                    copyButton.style.display = 'none';
+                } else {
+                    // Currently showing Markdown, switch to Rich Text
+                    // Perform conversion before showing the output
+                    convertMarkdownToHtml();
+                    markdownInput.style.display = 'none';
+                    outputDiv.style.display = 'block';
+                    toggleButton.textContent = 'Edit Markdown';
+                    copyButton.style.display = 'inline-block';
+                }
+            }
+
+            async function copyToClipboard() {
+                // Get both the rich HTML and plain text versions of the content
+                const htmlContent = outputDiv.innerHTML;
+                const plainTextContent = outputDiv.textContent;
+
+                try {
+                    const clipboardItem = new ClipboardItem({
+                        'text/plain': new Blob([plainTextContent], { type: 'text/plain' }),
+                        'text/html': new Blob([htmlContent], { type: 'text/html' })
+                    });
+                    
+                    await navigator.clipboard.write([clipboardItem]);
+
+                    const originalText = copyButton.textContent;
+                    copyButton.textContent = 'Copied!';
+                    setTimeout(() => {
+                        copyButton.textContent = originalText;
+                    }, 2000);
+                } catch (err) {
+                    console.error('Failed to copy rich text: ', err);
+                    alert('Could not copy text. Please try again or copy manually.');
+                }
+            }
+
+            // Set the initial state by performing the conversion
+            convertMarkdownToHtml();
+
+            // Toggle the view when the button is clicked
+            toggleButton.addEventListener('click', toggleView);
+
+            // Copy to clipboard when the button is clicked
+            copyButton.addEventListener('click', copyToClipboard);
+        });
+    </script>
+</body>
+</html>
